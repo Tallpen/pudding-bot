@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // Allow CORS from GitHub Pages
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -8,21 +7,45 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  // LINE webhook events (for getting group ID)
+  if (req.method === 'POST' && req.body?.events) {
+    const token = process.env.LINE_CHANNEL_TOKEN;
+    const events = req.body.events;
+
+    for (const event of events) {
+      // When bot joins a group, log the group ID
+      if (event.type === 'join' && event.source?.type === 'group') {
+        const groupId = event.source.groupId;
+        // Send the group ID back to the group as a message
+        await fetch('https://api.line.me/v2/bot/message/push', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            to: groupId,
+            messages: [{ type: 'text', text: `✅ 吉的寶布丁 Bot 已加入！\n群組 ID：${groupId}\n請複製這串 ID 填入設定。` }],
+          }),
+        });
+      }
+    }
+
+    return res.status(200).end();
   }
 
-  const { ticketNum, remaining } = req.body;
-  const token = process.env.LINE_CHANNEL_TOKEN;
-  const groupId = process.env.LINE_GROUP_ID;
+  // Coupon redeem notification
+  if (req.method === 'POST') {
+    const { ticketNum, remaining } = req.body || {};
+    const token = process.env.LINE_CHANNEL_TOKEN;
+    const groupId = process.env.LINE_GROUP_ID;
 
-  if (!token || !groupId) {
-    return res.status(500).json({ error: 'Missing environment variables' });
-  }
+    if (!token || !groupId || groupId === 'placeholder') {
+      return res.status(500).json({ error: 'LINE_GROUP_ID not set' });
+    }
 
-  const message = `🍮 吉的寶手作布丁兌換券\n\n已兌換第 ${ticketNum} 張！\n剩餘 ${remaining} / 10 張`;
+    const message = `🍮 吉的寶手作布丁兌換券\n\n已兌換第 ${ticketNum} 張！\n剩餘 ${remaining} / 10 張`;
 
-  try {
     const response = await fetch('https://api.line.me/v2/bot/message/push', {
       method: 'POST',
       headers: {
@@ -36,13 +59,9 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(500).json({ error: data });
-    }
-
+    if (!response.ok) return res.status(500).json({ error: data });
     return res.status(200).json({ success: true });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
   }
+
+  return res.status(200).end();
 }
