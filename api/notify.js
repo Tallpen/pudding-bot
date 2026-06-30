@@ -25,7 +25,7 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             to: groupId,
-            messages: [{ type: 'text', text: `✅ 吉的寶布丁 Bot 已加入！\n群組 ID：${groupId}\n請複製這串 ID 填入設定。` }],
+            messages: [{ type: 'text', text: `✅ 吉的寶 Bot 已加入！\n群組 ID：${groupId}\n請複製這串 ID 填入設定。` }],
           }),
         });
       }
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'LINE_GROUP_ID not set' });
     }
 
-    const message = `🍮 吉的寶手作布丁兌換券\n\n已兌換第 ${ticketNum} 張！\n剩餘 ${remaining} / 10 張`;
+    const message = `🍮 吉的寶手作布丁兌換券\n\n已兌換第 ${ticketNum} 張！\n剩餘 ${remaining} 張`;
 
     const response = await fetch('https://api.line.me/v2/bot/message/push', {
       method: 'POST',
