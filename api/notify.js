@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'LINE_GROUP_ID not set' });
     }
 
-    const message = `🍮 吉的寶手作布丁\n\n黃🐷本次兌換 ${ticketNum} 份\n特殊需求：${note}\n請耐心等候製作。\n\n共剩餘 ${remaining} 張兌換券。`;
+    const message = `🍮 吉的寶手作布丁\n\n黃🐷本次兌換 ${ticketNum} 份\n需求備註：${note}\n請耐心等候製作。\n\n共剩餘 ${remaining} 張兌換券。`;
 
     const response = await fetch('https://api.line.me/v2/bot/message/push', {
       method: 'POST',
