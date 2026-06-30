@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
   // Coupon redeem notification
   if (req.method === 'POST') {
-    const { ticketNum, remaining } = req.body || {};
+    const { ticketNum, remaining, note } = req.body || {};
     const token = process.env.LINE_CHANNEL_TOKEN;
     const groupId = process.env.LINE_GROUP_ID;
 
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'LINE_GROUP_ID not set' });
     }
 
-    const message = `🍮 吉的寶手作布丁兌換券\n\n本次兌換 ${ticketNum} 份！\n請耐心等候製作\n\n剩餘 ${remaining} 張兌換券。`;
+    const message = `🍮 吉的寶手作布丁兌換券\n\n本次兌換 ${ticketNum} 份！\n`特殊需求：${note}`\n請耐心等候製作\n\n剩餘 ${remaining} 張兌換券。`;
 
     const response = await fetch('https://api.line.me/v2/bot/message/push', {
       method: 'POST',
