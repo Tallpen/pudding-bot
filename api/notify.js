@@ -25,7 +25,7 @@ export default async function handler(req, res) {
           },
           body: JSON.stringify({
             to: groupId,
-            messages: [{ type: 'text', text: `✅ 吉的寶 Bot 已加入！\n群組 ID：${groupId}\n請複製這串 ID 填入設定。` }],
+            messages: [{ type: 'text', text: `${groupId}` }],
           }),
         });
       }
